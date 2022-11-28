@@ -1,0 +1,14 @@
+# Global Constants
+RED = (255, 51, 51)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+ORANGE = (204, 102, 0)
+WHITE = (225, 225, 225)
+YELLOW = (250, 236, 80)
+ORANGE_YELLOW = (250, 125, 45)
+BACK_BLUE = (0, 25, 51)
+BLACK = (0, 0, 0)
+
+WIDTH = 800
+HEIGHT = 700
+SQUARE = 40
