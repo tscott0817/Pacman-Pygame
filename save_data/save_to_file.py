@@ -49,7 +49,8 @@ class SaveToFile:
             reader = csv.reader(file)
 
             for row in reader:
-                if not row[0]:  # If row empty
+                # if not row:  # If row empty
+                if not row:  # If row empty
                     print("Error: Row in file empty")
                 else:  # Check first element of each row (username)
                     print(row)

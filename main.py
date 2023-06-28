@@ -38,7 +38,7 @@ quit_button = button.Button(325, 415, quit_img, 1)
 # level1_button = button.Button(311, 75, level1_img, 1)
 # level2_button = button.Button(311, 200, level2_img, 1)
 # level3_button = button.Button(311, 325, level3_img, 1)
-back_button = button.Button(327.5, 475, back_img, 1)
+back_button = button.Button(width * .4, 475, back_img, 1)
 
 filepath = "save_data/hi_scores.csv"
 save = save_to_file.SaveToFile(filepath)
@@ -93,6 +93,7 @@ def draw_text(text, font, text_col, x, y):
   window.blit(img, (x, y))
 
 # Update what is being displayed  on screen
+# Manages screen states
 def update():
 
     # Launches the main game
@@ -127,10 +128,11 @@ score_list = []
 def highscore_window():
     global call_reader
     global score_list
+    global width, height
     score_pos = 150
     window.fill(BLACK)
     hi_score_text = font.render("High Scores", True, (255, 255, 255))
-    window.blit(hi_score_text, (325, 100))
+    window.blit(hi_score_text, (width * .35, 100))
 
     if call_reader == 0:
         score_list = save.get_all_hi_scores()
@@ -138,15 +140,15 @@ def highscore_window():
 
     # display the scores
     for user in score_list:
-        score_pos += 30
+        score_pos += 50
 
         # Username
         user_score = font.render(user[0], True, (255, 255, 255))
-        window.blit(user_score, (300, score_pos))
+        window.blit(user_score, (width * .3, score_pos))
 
         # Score
         user_score = font.render(user[1], True, (255, 255, 255))
-        window.blit(user_score, (450, score_pos))
+        window.blit(user_score, (width * .6, score_pos))
 
     back_button.draw(window)
 

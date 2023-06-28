@@ -250,10 +250,6 @@ class Game:
                         self.all_board_objects.append(decision_node)
                         self.all_board_tiles.append(self.board[i][j])
                         self.traversal_tiles.append(decision_node)
-
-                    # This must be outside of IF statement
-                    # Add to possible decision tiles
-                    if not self.board_built:
                         self.decision_tiles.append(decision_node)
 
                     # Make sure this stays here, caused massive slowdowns otherwise
@@ -343,7 +339,6 @@ class Game:
             self.pink_ghost.frightened(self.decision_tiles, self.player.PACMAN_BB)
         else:
             self.blue_ghost.scared = False
-
             # tracemalloc.start()
             self.blue_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
             # # displaying the memory
@@ -353,14 +348,14 @@ class Game:
 
             # self.blue_ghost.scatter(self.decision_tiles)
             self.red_ghost.scared = False
-            # self.red_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
+            self.red_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
             # self.red_ghost.scatter(self.decision_tiles)
             self.yellow_ghost.scared = False
-            # self.yellow_ghost.scatter(self.decision_tiles)
+            self.yellow_ghost.scatter(self.decision_tiles)
             #self.yellow_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
 
             self.pink_ghost.scared = False
-            # self.pink_ghost.scatter(self.decision_tiles)
+            self.pink_ghost.scatter(self.decision_tiles)
             #self.pink_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
 
         if self.blue_ghost.scared:
