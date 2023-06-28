@@ -5,6 +5,9 @@ from save_data import save_to_file
 import button
 import game
 from game import *
+import cProfile
+
+import tracemalloc  # FOR MEMORY PROFILING
 
 FRAMERATE = 60  # Update function tied to framerate, so should stay at 60.
 width = 800

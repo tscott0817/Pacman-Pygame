@@ -6,6 +6,7 @@ import ghost
 from save_data import save_to_file
 import os
 import random
+import tracemalloc  # FOR MEMORY PROFILING
 
 # Window
 pygame.display.set_caption("Pacman")
@@ -103,7 +104,6 @@ class Game:
             # Draw player
             self.player.draw(self.window)
 
-            # Draw ghosts
             self.blue_ghost.draw(self.window)
             self.red_ghost.draw(self.window)
             self.yellow_ghost.draw(self.window)
@@ -114,6 +114,7 @@ class Game:
             # Movement
             self.player.move()
             self.player.tunnel_transport()
+
             self.ghost_swap_state()  # All ghost movement calls are in this function
 
             # Sends pacman back to appropriate spawn point once caught by
@@ -243,7 +244,7 @@ class Game:
 
                     # What the pacman collects
                     #tic_tac = pygame.draw.circle(self.window, GREEN, ((j * self.square + self.square // 2) + (self.horizontal_offset), i * self.square + self.square // 2), self.square // 4)
-                    tic_tac = pygame.draw.circle(self.window, YELLOW, ((j * self.square + self.square // 2) + (self.horizontal_offset), i * self.square + self.square // 2), self.square // 8)
+                    tic_tac = pygame.draw.circle(self.window, RED, ((j * self.square + self.square // 2) + (self.horizontal_offset), i * self.square + self.square // 2), self.square // 8)
 
                     if not self.board_built:
                         self.all_board_objects.append(decision_node)
@@ -252,7 +253,8 @@ class Game:
 
                     # This must be outside of IF statement
                     # Add to possible decision tiles
-                    self.decision_tiles.append(decision_node)
+                    if not self.board_built:
+                        self.decision_tiles.append(decision_node)
 
                     # Make sure this stays here, caused massive slowdowns otherwise
                     collected = self.player.collect_points(self.player.PACMAN_BB, tic_tac, "tic_tac")  # Returns true if collected
@@ -325,6 +327,12 @@ class Game:
             index += 1
 
     def ghost_swap_state(self):
+        # tracemalloc.start()
+        # # displaying the memory
+        # print(tracemalloc.get_traced_memory())
+        # # stopping the library
+        # tracemalloc.stop()
+
         tick_itr = pygame.time.get_ticks()
         # If any ghost is frightened, then they all are
         # If 5 seconds have passed since the ghost have been scared, switch back to chase
@@ -335,16 +343,24 @@ class Game:
             self.pink_ghost.frightened(self.decision_tiles, self.player.PACMAN_BB)
         else:
             self.blue_ghost.scared = False
+
+            # tracemalloc.start()
             self.blue_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
-            #self.blue_ghost.scatter(self.decision_tiles)
+            # # displaying the memory
+            # print(tracemalloc.get_traced_memory())
+            # # stopping the library
+            # tracemalloc.stop()
+
+            # self.blue_ghost.scatter(self.decision_tiles)
             self.red_ghost.scared = False
-            self.red_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
-            #self.red_ghost.scatter(self.decision_tiles)
+            # self.red_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
+            # self.red_ghost.scatter(self.decision_tiles)
             self.yellow_ghost.scared = False
-            self.yellow_ghost.scatter(self.decision_tiles)
+            # self.yellow_ghost.scatter(self.decision_tiles)
             #self.yellow_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
+
             self.pink_ghost.scared = False
-            self.pink_ghost.scatter(self.decision_tiles)
+            # self.pink_ghost.scatter(self.decision_tiles)
             #self.pink_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
 
         if self.blue_ghost.scared:
