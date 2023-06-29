@@ -43,7 +43,7 @@ class Game:
     pygame.mixer.init()
 
 
-    def __init__(self, window, level):
+    def __init__(self, window):
         # Window stuff
         self.square = 40
         self.fruit_img = pygame.image.load(self.fruit_png).convert_alpha()
@@ -67,7 +67,7 @@ class Game:
         self.food_choice = None
         self.food_spawn_again = True
         self.food_tick = 0
-        self.level = level
+        self.level = 1
         self.board = []
 
         # Used for resetting pacman after ghost catches it
@@ -81,6 +81,8 @@ class Game:
         self.game_start_sound = pygame.mixer.Sound("assets/audio/game_start.wav")
         self.background_music = pygame.mixer.Sound("assets/audio/siren_1.wav")
         self.last_timestamp = pygame.time.get_ticks()
+
+        self.game_board_init()
 
 
 
@@ -199,11 +201,6 @@ class Game:
         self.level = level
         self.board = []
         self.read_board_from_file()
-        self.game_board_init()
-        self.player.num_lives = 3
-        self.player.points = 0
-        self.points = 0
-        self.game_over = False
         self.game_board_init()
         self.player.num_lives = 3
         self.player.points = 0
