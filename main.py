@@ -1,3 +1,5 @@
+import time
+
 import pygame
 import csv
 from save_data import save_to_file
@@ -15,19 +17,38 @@ class Settings:
     framerate = 60
     width = 800
     height = 600
-    window = pygame.display.set_mode((width, height))
+    last_timestamp = 0
+    sound_start_time = -1
+    # window = pygame.display.set_mode((width, height))
 
 def main():
     '''
         Default Inits
     '''
     settings = Settings()
+    window = pygame.display.set_mode((settings.width, settings.height))
+
     home_screen = HomeScreen()
     hs_screen = HighscoresScreen()
-    game_loop = game.Game(settings.window)  # @param: render window, default level
+    game_loop = game.Game(window)
     game_state = "Home"
     clock = pygame.time.Clock()  # For binding refresh rate and framerate
     running = True
+
+    '''
+        Sounds
+    '''
+    sound_menu = pygame.mixer.Sound("assets/audio/intermission.wav")
+
+    def playSound(sound, wait_time):
+
+        current_time = pygame.time.get_ticks()
+        if current_time - settings.last_timestamp >= wait_time:
+            pygame.mixer.Sound.play(sound)
+            pygame.mixer.music.stop()
+            settings.last_timestamp = current_time
+            pygame.time.set_timer(pygame.USEREVENT, wait_time)
+
 
     # Main event loop
     while running:
@@ -37,6 +58,13 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+        '''
+            Sound
+        '''
+        # current_time = pygame.time.get_ticks()
+        # if current_time - settings.sound_start_time >= sound_menu.get_length() * 1000:
+        #     playSound(sound_menu, 5000)  # Play sound again once it has finished
 
         '''
             Select Level
@@ -53,10 +81,10 @@ def main():
             Screen States
         '''
         key_input = pygame.key.get_pressed()
-        if key_input[pygame.K_ESCAPE]:
+        if key_input[pygame.K_ESCAPE]:  # Always go back to home if ESC pressed
             game_state = "Home"
 
-        if game_state == "Home":
+        if game_state == "Home":  #
             if home_screen.new_game_button.is_drawn():
                 game_state = "Game"
             elif home_screen.highscore_button.is_drawn():
@@ -66,28 +94,24 @@ def main():
 
         if game_loop.game_over:
             game_loop.game_over = False
-            game_state = "Home"
+            game_state = "Home"  # TODO: Will want to alter logic here to just go to next level
 
         # if user presses the back button  or space bar go back to Start window
         if hs_screen.back_button.is_drawn() or key_input[pygame.K_ESCAPE]:
             game_state = "Home"
 
-        update(game_state, game_loop, home_screen, hs_screen, settings)
+        update(window, game_state, game_loop, home_screen, hs_screen)
 
     pygame.quit()
 
 
-def update(game_state, game_loop, home_screen, hs_screen, settings):  # TODO: Not sure that I like these params
-
+def update(window, game_state, game_loop, home_screen, hs_screen):  # TODO: Not sure that I like these params
     if game_state == "Home":
-        home_screen.draw(settings.window)
-
+        home_screen.draw(window)
     elif game_state == "Game":
         game_loop.update()
-
     elif game_state == "Highscore":
-        hs_screen.draw(settings.window)
-
+        hs_screen.draw(window)
     pygame.display.update()
 
 
@@ -133,7 +157,7 @@ class HighscoresScreen:
         self.h_font = pygame.font.SysFont("arialblack", 20)
 
     def draw(self, window):
-        score_pos = 150
+        score_position = 150
         window.fill(BLACK)
         window.blit(self.hi_score_text, (800 * .35, 100))
 
@@ -143,15 +167,15 @@ class HighscoresScreen:
 
         # display the scores
         for user in self.score_list:
-            score_pos += 50
+            score_position += 50
 
             # Username
             user_score = font.render(user[0], True, (255, 255, 255))
-            window.blit(user_score, (800 * .3, score_pos))
+            window.blit(user_score, (800 * .3, score_position))
 
             # Score
             user_score = font.render(user[1], True, (255, 255, 255))
-            window.blit(user_score, (800 * .6, score_pos))
+            window.blit(user_score, (800 * .6, score_position))
 
         self.back_button.draw(window)
 

@@ -80,6 +80,7 @@ class Game:
 
         self.game_start_sound = pygame.mixer.Sound("assets/audio/game_start.wav")
         self.background_music = pygame.mixer.Sound("assets/audio/siren_1.wav")
+        self.background_music.set_volume(.5)
         self.last_timestamp = pygame.time.get_ticks()
 
         self.game_board_init()
@@ -103,7 +104,7 @@ class Game:
         current_time = pygame.time.get_ticks()
         if current_time - self.last_timestamp >= wait_time:
             pygame.mixer.Sound.play(sound)
-            # pygame.mixer.music.stop()
+            pygame.mixer.music.stop()
             self.last_timestamp = current_time
 
     def update(self):
@@ -154,6 +155,10 @@ class Game:
             # self.draw_score(150, 10)
             # self.draw_lives(500, 10)
             self.draw_top()
+
+            # TODO: Audio state managing
+            self.playSound(self.background_music, 1550)
+
 
 
 
