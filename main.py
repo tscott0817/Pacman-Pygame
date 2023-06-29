@@ -25,12 +25,9 @@ def main():
     home_screen = HomeScreen()
     hs_screen = HighscoresScreen()
     game_loop = game.Game(settings.window)  # @param: render window, default level
-
-
-    # Init vars
+    game_state = "Home"
     clock = pygame.time.Clock()  # For binding refresh rate and framerate
     running = True
-    game_state = "Start"
 
     # Main event loop
     while running:
@@ -56,23 +53,24 @@ def main():
             Screen States
         '''
         key_input = pygame.key.get_pressed()
-        if home_screen.newGame_button.is_drawn():
-            game_state = "Game"
+        if key_input[pygame.K_ESCAPE]:
+            game_state = "Home"
 
-        elif home_screen.highscore_button.is_drawn():
-            game_state = "Highscore"
-
-        # if user presses the button or hits the key "q" end the game
-        elif home_screen.quit_button.is_drawn() or key_input[pygame.K_q] and game_state != "Game" and game_state != "Highscore":
-            running = False
+        if game_state == "Home":
+            if home_screen.new_game_button.is_drawn():
+                game_state = "Game"
+            elif home_screen.highscore_button.is_drawn():
+                game_state = "Highscore"
+            elif home_screen.quit_button.is_drawn() or key_input[pygame.K_q]:
+                running = False
 
         if game_loop.game_over:
             game_loop.game_over = False
-            game_state = "Start"
+            game_state = "Home"
 
         # if user presses the back button  or space bar go back to Start window
         if hs_screen.back_button.is_drawn() or key_input[pygame.K_ESCAPE]:
-            game_state = "Start"
+            game_state = "Home"
 
         update(game_state, game_loop, home_screen, hs_screen, settings)
 
@@ -81,7 +79,7 @@ def main():
 
 def update(game_state, game_loop, home_screen, hs_screen, settings):  # TODO: Not sure that I like these params
 
-    if game_state == "Start":
+    if game_state == "Home":
         home_screen.draw(settings.window)
 
     elif game_state == "Game":
@@ -95,28 +93,24 @@ def update(game_state, game_loop, home_screen, hs_screen, settings):  # TODO: No
 
 class HomeScreen:
     def __init__(self):
-        self._logo_img = pygame.image.load("assets/img/pacmanLogo.png")
-        self._newGame_img = pygame.image.load("assets/img/newGame2.png").convert_alpha()
+        self._logo_img = pygame.image.load("assets/img/logo4.png")
+        self._new_game_img = pygame.image.load("assets/img/newGame2.png").convert_alpha()
         self._highscore_img = pygame.image.load("assets/img/highscores.png").convert_alpha()
         self._quit_img = pygame.image.load("assets/img/quit.png").convert_alpha()
         self._level1_img = pygame.image.load('assets/img/back.png').convert_alpha()
         self._level2_img = pygame.image.load('assets/img/back.png').convert_alpha()
-        # level3_img = pygame.image.load('assets/level3.png').convert_alpha()
-        # self._back_img = pygame.image.load('assets/img/back.png').convert_alpha()
 
-        #create button instances
-        self._logo_button = button.Button(63.5, -75, self._logo_img, 1)
-        self.newGame_button = button.Button(285.5, 225, self._newGame_img, 1)
+        self._logo_button = button.Button(20, 25, self._logo_img, 1)
+        self.new_game_button = button.Button(285.5, 225, self._new_game_img, 1)
         self.highscore_button = button.Button(283.5, 325, self._highscore_img, 1)
         self.quit_button = button.Button(325, 415, self._quit_img, 1)
         self.level1_button = button.Button(550, 250, self._level1_img, 1)
         self.level2_button = button.Button(550, 350, self._level2_img, 1)
-        # level3_button = button.Button(311, 325, level3_img, 1)
 
     def draw(self, window):
-        window.fill(BLACK)  # Replaces game content
+        window.fill((25, 25, 25))  # Replaces game content
         self._logo_button.draw(window)
-        self.newGame_button.draw(window)
+        self.new_game_button.draw(window)
         self.highscore_button.draw(window)
         self.quit_button.draw(window)
         self.level1_button.draw(window)
@@ -133,7 +127,7 @@ class HighscoresScreen:
         self.save = save_to_file.SaveToFile(self.filepath)
         self.display_score = True
         self.back_img = pygame.image.load('assets/img/back.png').convert_alpha()
-        self.back_button = button.Button(800 * .4, 475, self.back_img, 1)
+        self.back_button = button.Button(25, 500, self.back_img, 1)
         self.hi_score_text = font.render("High Scores", True, (255, 255, 255))
         self.font = pygame.font.SysFont("arialblack", 40)
         self.h_font = pygame.font.SysFont("arialblack", 20)
