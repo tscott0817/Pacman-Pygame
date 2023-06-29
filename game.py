@@ -9,7 +9,7 @@ import random
 import tracemalloc  # FOR MEMORY PROFILING
 
 # Window
-pygame.display.set_caption("Pacman")
+# pygame.display.set_caption("Pacman")
 
 # Fonts
 pygame.font.init()
@@ -27,6 +27,7 @@ save_score = True
 # fruit_png = os.path.join('assets', 'fruit.png')
 # life_png = os.path.join('assets', 'lives.png')
 
+game_started = False
 class Game:
 
     # Unsure if this is best here or outside of class
@@ -37,11 +38,12 @@ class Game:
     yellow_ghost = ghost.Ghost("Yellow")
     pink_ghost = ghost.Ghost("Pink")
     # filepath to images
-    fruit_png = os.path.join('assets', 'fruit.png')
-    life_png = os.path.join('assets', 'lives.png')
+    fruit_png = os.path.join('assets/img', 'fruit.png')
+    life_png = os.path.join('assets/img', 'lives.png')
+    pygame.mixer.init()
 
 
-    def __init__(self, window):
+    def __init__(self, window, level):
         # Window stuff
         self.square = 40
         self.fruit_img = pygame.image.load(self.fruit_png).convert_alpha()
@@ -65,7 +67,7 @@ class Game:
         self.food_choice = None
         self.food_spawn_again = True
         self.food_tick = 0
-        self.level = 1
+        self.level = level
         self.board = []
 
         # Used for resetting pacman after ghost catches it
@@ -75,6 +77,11 @@ class Game:
         self.board_built = False
         self.game_over = False
         self.read_board_from_file()
+
+        self.game_start_sound = pygame.mixer.Sound("assets/audio/game_start.wav")
+        self.background_music = pygame.mixer.Sound("assets/audio/siren_1.wav")
+        self.last_timestamp = pygame.time.get_ticks()
+
 
 
         # TODO: Can make this either set to global variable here or as class parameter (with grid saved to a file)
@@ -90,12 +97,28 @@ class Game:
                 oneRow2.append(int(num))
             self.board.append(oneRow2)
 
+    def playSound(self, sound, wait_time):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_timestamp >= wait_time:
+            pygame.mixer.Sound.play(sound)
+            # pygame.mixer.music.stop()
+            self.last_timestamp = current_time
+
     def update(self):
+
+        # global game_started
+        # if not game_started:
+        #     pygame.mixer.Sound.play(self.game_start_sound)
+        #     pygame.mixer.music.stop()
+        #     pygame.time.delay(5000)
+        #     game_started = True
+
+        # self.playSound(self.background_music, 1000)
 
         #global points
         dead = self.player.die()
         if not dead and not self.game_won():
-
+            # self.playSound(self.background_music, 1000)
             self.window.fill(BACK_BLUE)
 
             # Draw board first so it is the furthest background layer
@@ -129,6 +152,7 @@ class Game:
             # self.draw_score(150, 10)
             # self.draw_lives(500, 10)
             self.draw_top()
+
 
 
         else:
@@ -169,6 +193,22 @@ class Game:
         self.spawn_ghost(self.red_ghost.ghost_bb)
         self.spawn_ghost(self.yellow_ghost.ghost_bb)
         self.spawn_ghost(self.pink_ghost.ghost_bb)
+
+    # Create a function to change the class variable for the level
+    def change_level(self, level):
+        self.level = level
+        self.board = []
+        self.read_board_from_file()
+        self.game_board_init()
+        self.player.num_lives = 3
+        self.player.points = 0
+        self.points = 0
+        self.game_over = False
+        self.game_board_init()
+        self.player.num_lives = 3
+        self.player.points = 0
+        self.points = 0
+        self.game_over = False
 
     def game_board(self):
         # Loop through matrix and place objects at appropriate coordinates
@@ -323,12 +363,6 @@ class Game:
             index += 1
 
     def ghost_swap_state(self):
-        # tracemalloc.start()
-        # # displaying the memory
-        # print(tracemalloc.get_traced_memory())
-        # # stopping the library
-        # tracemalloc.stop()
-
         tick_itr = pygame.time.get_ticks()
         # If any ghost is frightened, then they all are
         # If 5 seconds have passed since the ghost have been scared, switch back to chase
@@ -339,13 +373,7 @@ class Game:
             self.pink_ghost.frightened(self.decision_tiles, self.player.PACMAN_BB)
         else:
             self.blue_ghost.scared = False
-            # tracemalloc.start()
             self.blue_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
-            # # displaying the memory
-            # print(tracemalloc.get_traced_memory())
-            # # stopping the library
-            # tracemalloc.stop()
-
             # self.blue_ghost.scatter(self.decision_tiles)
             self.red_ghost.scared = False
             self.red_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
@@ -353,7 +381,6 @@ class Game:
             self.yellow_ghost.scared = False
             self.yellow_ghost.scatter(self.decision_tiles)
             #self.yellow_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
-
             self.pink_ghost.scared = False
             self.pink_ghost.scatter(self.decision_tiles)
             #self.pink_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
