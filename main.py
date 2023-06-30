@@ -144,6 +144,7 @@ class HomeScreen:
 # TODO: Put in own class
 class HighscoresScreen:
     def __init__(self):
+        pygame.font.init()
         self.call_reader = 0
         self.score = ""
         self.score_list = []
@@ -152,8 +153,9 @@ class HighscoresScreen:
         self.display_score = True
         self.back_img = pygame.image.load('assets/img/back.png').convert_alpha()
         self.back_button = button.Button(25, 500, self.back_img, 1)
-        self.hi_score_text = font.render("High Scores", True, (255, 255, 255))
-        self.font = pygame.font.SysFont("arialblack", 40)
+        self.hi_score_text = pygame.font.Font('freesansbold.ttf', 32).render("High Scores", True, (255, 255, 255))
+        self.font = pygame.font.Font('freesansbold.ttf', 32)
+        # self.font = pygame.font.SysFont("arialblack", 40)
         self.h_font = pygame.font.SysFont("arialblack", 20)
 
     def draw(self, window):
@@ -170,11 +172,11 @@ class HighscoresScreen:
             score_position += 50
 
             # Username
-            user_score = font.render(user[0], True, (255, 255, 255))
+            user_score = self.font.render(user[0], True, (255, 255, 255))
             window.blit(user_score, (800 * .3, score_position))
 
             # Score
-            user_score = font.render(user[1], True, (255, 255, 255))
+            user_score = self.font.render(user[1], True, (255, 255, 255))
             window.blit(user_score, (800 * .6, score_position))
 
         self.back_button.draw(window)

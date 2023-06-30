@@ -8,13 +8,6 @@ import os
 import random
 import tracemalloc  # FOR MEMORY PROFILING
 
-# Window
-# pygame.display.set_caption("Pacman")
-
-# Fonts
-pygame.font.init()
-font = pygame.font.Font('freesansbold.ttf', 32)
-
 # Save data
 filepath = "save_data/hi_scores.csv"
 save = save_to_file.SaveToFile(filepath)
@@ -22,12 +15,8 @@ username = "Joe"  # TODO: This will be entered in by the user
 
 # Used so score is only added to file once per game
 save_score = True
-
-# # filepath to images
-# fruit_png = os.path.join('assets', 'fruit.png')
-# life_png = os.path.join('assets', 'lives.png')
-
 game_started = False
+
 class Game:
 
     # Unsure if this is best here or outside of class
@@ -45,6 +34,7 @@ class Game:
 
     def __init__(self, window):
         # Window stuff
+        pygame.font.init()
         self.square = 40
         self.fruit_img = pygame.image.load(self.fruit_png).convert_alpha()
         self.fruit = pygame.transform.scale(self.fruit_img, (30, 30))
@@ -80,92 +70,46 @@ class Game:
 
         self.game_start_sound = pygame.mixer.Sound("assets/audio/game_start.wav")
         self.background_music = pygame.mixer.Sound("assets/audio/siren_1.wav")
-        self.background_music.set_volume(.5)
+        self.background_music.set_volume(.75)
         self.last_timestamp = pygame.time.get_ticks()
 
         self.game_board_init()
 
+        self.frightened_sound = pygame.mixer.Sound("assets/audio/power_pellet.wav")
+        self.frightened_sound.set_volume(0.3)
+        self.font = pygame.font.Font('freesansbold.ttf', 32)
 
 
-        # TODO: Can make this either set to global variable here or as class parameter (with grid saved to a file)
 
-    def read_board_from_file(self):
-        # drawing board by reading files
-        fileName = "map" + str(self.level) + ".txt"
-        gameBoard = open(fileName, 'r')
-        for line in gameBoard:
-            oneRow = line.split()
-            oneRow2 = []
-            for num in oneRow:
-                oneRow2.append(int(num))
-            self.board.append(oneRow2)
-
-    def playSound(self, sound, wait_time):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_timestamp >= wait_time:
-            pygame.mixer.Sound.play(sound)
-            pygame.mixer.music.stop()
-            self.last_timestamp = current_time
 
     def update(self):
 
-        # global game_started
-        # if not game_started:
-        #     pygame.mixer.Sound.play(self.game_start_sound)
-        #     pygame.mixer.music.stop()
-        #     pygame.time.delay(5000)
-        #     game_started = True
-
-        # self.playSound(self.background_music, 1000)
-
-        #global points
         dead = self.player.die()
         if not dead and not self.game_won():
-            # self.playSound(self.background_music, 1000)
             self.window.fill(BACK_BLUE)
-
-            # Draw board first so it is the furthest background layer
             self.game_board()
-
-            # Draw player
+            self.player.move()
+            self.player.tunnel_transport()
             self.player.draw(self.window)
-
             self.blue_ghost.draw(self.window)
             self.red_ghost.draw(self.window)
             self.yellow_ghost.draw(self.window)
             self.pink_ghost.draw(self.window)
-
-            self.spawn_food()
-
-            # Movement
-            self.player.move()
-            self.player.tunnel_transport()
-
+            self.spawn_food()  # TODO: Need to re-write this entire function
             self.ghost_swap_state()  # All ghost movement calls are in this function
+            self.draw_top()
+            self.play_sound(self.background_music, 1550)
 
-            # Sends pacman back to appropriate spawn point once caught by
+            # Sends pacman back to appropriate spawn point once caught by ghost
             # TODO: Don't quite like this approach, but works for right now
-            i = 0
-            for tile in self.all_board_tiles:  # Checks all objects and gets the associated tile of the spawn point
+            for i, tile in enumerate(self.all_board_tiles):  # Checks all objects and gets the associated tile of the spawn point
                 if tile == 0:
                     self.pacman_spawn_point = self.all_board_objects[i]
                 i += 1
-
-            # Some score/display items
-            # self.draw_score(150, 10)
-            # self.draw_lives(500, 10)
-            self.draw_top()
-
-            # TODO: Audio state managing
-            self.playSound(self.background_music, 1550)
-
-
-
-
         else:
             if dead:
                 self.draw_dead(200, 285)
-                self.spawn_pacman(self.player.PACMAN_BB)
+                self.spawn_pacman(self.player.pacman_bb)
                 self.player.num_lives = 3  # Reset number of lives after each game
                 self.reset_board()
                 self.player.points = 0
@@ -185,32 +129,31 @@ class Game:
                 self.player.num_lives = 3
                 self.reset_board()
                 self.game_over = True
-                self.spawn_pacman(self.player.PACMAN_BB)
+                self.spawn_pacman(self.player.pacman_bb)
                 # Only allow adding score for one frame (will add score continuously otherwise)
                 pygame.display.update()  # Don't call this outside of if statement, needed for time delay
                 pygame.time.delay(5000)
 
+    def read_board_from_file(self):
+        # drawing board by reading files
+        fileName = "map" + str(self.level) + ".txt"
+        gameBoard = open(fileName, 'r')
+        for line in gameBoard:
+            oneRow = line.split()
+            oneRow2 = []
+            for num in oneRow:
+                oneRow2.append(int(num))
+            self.board.append(oneRow2)
 
     def game_board_init(self):
         self.player.points = 0
         self.points = 0
         self.game_board()
-        self.spawn_pacman(self.player.PACMAN_BB)
+        self.spawn_pacman(self.player.pacman_bb)
         self.spawn_ghost(self.blue_ghost.ghost_bb)
         self.spawn_ghost(self.red_ghost.ghost_bb)
         self.spawn_ghost(self.yellow_ghost.ghost_bb)
         self.spawn_ghost(self.pink_ghost.ghost_bb)
-
-    # Create a function to change the class variable for the level
-    def change_level(self, level):
-        self.level = level
-        self.board = []
-        self.read_board_from_file()
-        self.game_board_init()
-        self.player.num_lives = 3
-        self.player.points = 0
-        self.points = 0
-        self.game_over = False
 
     def game_board(self):
         # Loop through matrix and place objects at appropriate coordinates
@@ -234,7 +177,7 @@ class Game:
                         self.traversal_tiles.append(tic_tac)
 
                     # If tic-tac has been collected then remove from board
-                    collected = self.player.collect_points(self.player.PACMAN_BB, tic_tac, "tic_tac")  # Returns true if collected
+                    collected = self.player.collect_points(self.player.pacman_bb, tic_tac, "tic_tac")  # Returns true if collected
                     if collected:
                         self.points = self.player.points
                         self.board[i][j] = 1
@@ -248,7 +191,7 @@ class Game:
                         self.all_board_tiles.append(self.board[i][j])
 
                     # Apply collision to between walls and characters
-                    collide.collide_objects(self.player.PACMAN_BB, wall)
+                    collide.collide_objects(self.player.pacman_bb, wall)
                     collide.collide_objects(self.blue_ghost.ghost_bb, wall)
                     collide.collide_objects(self.red_ghost.ghost_bb, wall)
                     collide.collide_objects(self.yellow_ghost.ghost_bb, wall)
@@ -263,7 +206,7 @@ class Game:
                         self.traversal_tiles.append(power_pellet)
 
                     # If power-pellet has been collected then remove from board
-                    collected = self.player.collect_points(self.player.PACMAN_BB, power_pellet, "power_pellet")  # Returns true if collected
+                    collected = self.player.collect_points(self.player.pacman_bb, power_pellet, "power_pellet")  # Returns true if collected
                     if collected:
                         self.points = self.player.points
                         self.board[i][j] = 1
@@ -295,7 +238,7 @@ class Game:
                         self.decision_tiles.append(decision_node)
 
                     # Make sure this stays here, caused massive slowdowns otherwise
-                    collected = self.player.collect_points(self.player.PACMAN_BB, tic_tac, "tic_tac")  # Returns true if collected
+                    collected = self.player.collect_points(self.player.pacman_bb, tic_tac, "tic_tac")  # Returns true if collected
                     if collected:
                         self.points = self.player.points
                         self.board[i][j] = 7
@@ -315,7 +258,7 @@ class Game:
     def draw_top(self):
         # draw from left to right
         # scores
-        score = font.render("Score: " + str(self.points), True, (255, 255, 255))
+        score = self.font.render("Score: " + str(self.points), True, (255, 255, 255))
         self.window.blit(score, (2*self.square, 7.5))
 
         # lives
@@ -325,11 +268,11 @@ class Game:
             self.window.blit(lives, ((17 - i)*self.square, 7.5))
 
     def draw_won(self, x, y):
-        won = font.render("You Won!", True, (100, 255, 100))
+        won = self.font.render("You Won!", True, (100, 255, 100))
         self.window.blit(won, (x, y))
 
     def draw_dead(self, x, y):
-        dead = font.render("Out Of Lives. Game Over! ", True, (255, 100, 100))
+        dead = self.font.render("Out Of Lives. Game Over! ", True, (255, 100, 100))
         self.window.blit(dead, (x, y))
 
     def spawn_food(self):
@@ -339,7 +282,7 @@ class Game:
 
             if len(self.possible_food_locations) > 0:
                 fruit_collectable = self.window.blit(self.fruit, (self.food_choice.x - 7.5, self.food_choice.y - 7.5))
-                collected = self.player.collect_points(self.player.PACMAN_BB, fruit_collectable, "fruit")  # Returns true if collected
+                collected = self.player.collect_points(self.player.pacman_bb, fruit_collectable, "fruit")  # Returns true if collected
                 if collected:
                     self.can_spawn_food = False
                     self.food_spawn_again = True
@@ -369,29 +312,34 @@ class Game:
         # If any ghost is frightened, then they all are
         # If 5 seconds have passed since the ghost have been scared, switch back to chase
         if self.blue_ghost.scared and tick_itr < self.pellet_tick + 5000:
-            self.blue_ghost.frightened(self.decision_tiles, self.player.PACMAN_BB)
-            self.red_ghost.frightened(self.decision_tiles, self.player.PACMAN_BB)
-            self.yellow_ghost.frightened(self.decision_tiles, self.player.PACMAN_BB)
-            self.pink_ghost.frightened(self.decision_tiles, self.player.PACMAN_BB)
+            pygame.mixer.Sound.stop(self.background_music)  # TODO: Seems to work well, do with all sound
+            self.blue_ghost.frightened(self.decision_tiles, self.player.pacman_bb)
+            self.red_ghost.frightened(self.decision_tiles, self.player.pacman_bb)
+            self.yellow_ghost.frightened(self.decision_tiles, self.player.pacman_bb)
+            self.pink_ghost.frightened(self.decision_tiles, self.player.pacman_bb)
         else:
+            pygame.mixer.Sound.stop(self.blue_ghost.frightened_sound)
+            pygame.mixer.Sound.stop(self.red_ghost.frightened_sound)
+            pygame.mixer.Sound.stop(self.yellow_ghost.frightened_sound)
+            pygame.mixer.Sound.stop(self.pink_ghost.frightened_sound)
             self.blue_ghost.scared = False
-            self.blue_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
+            self.blue_ghost.chase(self.decision_tiles, self.player.pacman_bb)
             # self.blue_ghost.scatter(self.decision_tiles)
             self.red_ghost.scared = False
-            self.red_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
+            self.red_ghost.chase(self.decision_tiles, self.player.pacman_bb)
             # self.red_ghost.scatter(self.decision_tiles)
             self.yellow_ghost.scared = False
             self.yellow_ghost.scatter(self.decision_tiles)
-            #self.yellow_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
+            #self.yellow_ghost.chase(self.decision_tiles, self.player.pacman_bb)
             self.pink_ghost.scared = False
             self.pink_ghost.scatter(self.decision_tiles)
-            #self.pink_ghost.chase(self.decision_tiles, self.player.PACMAN_BB)
+            #self.pink_ghost.chase(self.decision_tiles, self.player.pacman_bb)
 
         if self.blue_ghost.scared:
-            self.blue_ghost.eaten = self.player.collect_points(self.player.PACMAN_BB, self.blue_ghost.mouth, "ghost")
-            self.red_ghost.eaten = self.player.collect_points(self.player.PACMAN_BB, self.red_ghost.mouth, "ghost")
-            self.yellow_ghost.eaten = self.player.collect_points(self.player.PACMAN_BB, self.yellow_ghost.mouth, "ghost")
-            self.pink_ghost.eaten = self.player.collect_points(self.player.PACMAN_BB, self.pink_ghost.mouth, "ghost")
+            self.blue_ghost.eaten = self.player.collect_points(self.player.pacman_bb, self.blue_ghost.mouth, "ghost")
+            self.red_ghost.eaten = self.player.collect_points(self.player.pacman_bb, self.red_ghost.mouth, "ghost")
+            self.yellow_ghost.eaten = self.player.collect_points(self.player.pacman_bb, self.yellow_ghost.mouth, "ghost")
+            self.pink_ghost.eaten = self.player.collect_points(self.player.pacman_bb, self.pink_ghost.mouth, "ghost")
 
             if self.blue_ghost.eaten:
                 self.points = self.player.points
@@ -417,13 +365,30 @@ class Game:
 
         # If not in the "Frightened" state, then the ghost can eat Pacman
         if not self.blue_ghost.scared:
-            pacman_eaten_blue = self.blue_ghost.eat_pacman(self.player.PACMAN_BB, self.pacman_spawn_point)
-            pacman_eaten_red = self.red_ghost.eat_pacman(self.player.PACMAN_BB, self.pacman_spawn_point)
-            pacman_eaten_yellow = self.yellow_ghost.eat_pacman(self.player.PACMAN_BB, self.pacman_spawn_point)
-            pacman_eaten_pink = self.pink_ghost.eat_pacman(self.player.PACMAN_BB, self.pacman_spawn_point)
+            pacman_eaten_blue = self.blue_ghost.eat_pacman(self.player.pacman_bb, self.pacman_spawn_point)
+            pacman_eaten_red = self.red_ghost.eat_pacman(self.player.pacman_bb, self.pacman_spawn_point)
+            pacman_eaten_yellow = self.yellow_ghost.eat_pacman(self.player.pacman_bb, self.pacman_spawn_point)
+            pacman_eaten_pink = self.pink_ghost.eat_pacman(self.player.pacman_bb, self.pacman_spawn_point)
 
             if pacman_eaten_blue or pacman_eaten_red or pacman_eaten_yellow or pacman_eaten_pink:
                 self.player.lose_life()
+
+    def play_sound(self, sound, wait_time):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_timestamp >= wait_time:
+            pygame.mixer.Sound.play(sound)
+            pygame.mixer.music.stop()
+            self.last_timestamp = current_time
+
+    def change_level(self, level):
+        self.level = level
+        self.board = []
+        self.read_board_from_file()
+        self.game_board_init()
+        self.player.num_lives = 3
+        self.player.points = 0
+        self.points = 0
+        self.game_over = False
 
     # This needs to be checked every frame so can't use the list of tiles
     def game_won(self):
@@ -433,7 +398,6 @@ class Game:
                 if self.board[i][j] == 2 or self.board[i][j] == 5:
                     board_empty = False
 
-        # If this is still true, then the board is empty
         if board_empty:
             return True
         else:

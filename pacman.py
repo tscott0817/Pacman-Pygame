@@ -3,9 +3,8 @@ import os
 
 
 class Pacman:
-    # TODO: file paths stored in file
-    pacman_png_openMouth = os.path.join('assets/img',
-                                        'pacmanOpenMouth.png')  # Use this because filepaths can be different between OS's (like '/' vs '\')
+    # TODO: Change all filepaths to use os.path.join
+    pacman_png_openMouth = os.path.join('assets/img', 'pacmanOpenMouth.png')
     pacman_png_CloseMouth = os.path.join('assets/img', 'pacmanCloseMouth.png')
     points = 0
     pygame.display.init()
@@ -13,11 +12,9 @@ class Pacman:
     pygame.mixer.init()  # Not sure best place to put this
 
     def __init__(self):
-        self.PACMAN_IMG = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
-        self.PACMAN = pygame.transform.scale(self.PACMAN_IMG,
-                                             (30, 30))  # For resizing images, needs to be same size as bounding box
-        self.PACMAN_BB = pygame.Rect(600, 200, 40,
-                                     40)  # The 'Bounding Box' (Start positions changed in game, so these don't matter)
+        self.pacman_img = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
+        self.pacman = pygame.transform.scale(self.pacman_img, (30, 30))
+        self.pacman_bb = pygame.Rect(600, 200, 40, 40)
         self.move_speed = 4
         self.mouthOpen = True
         self.mouthOpenDelay = 0
@@ -32,6 +29,8 @@ class Pacman:
         self.last_timestamp = pygame.time.get_ticks()
 
     def draw(self, window):
+
+        # TODO: Eyu did the mouth open/close animation, not sure how it works
         if self.mouthOpenDelay == 7:
             self.mouthOpenDelay = 0
             self.mouthOpen = not self.mouthOpen
@@ -39,38 +38,38 @@ class Pacman:
         key_input = pygame.key.get_pressed()
         if self.mouthOpen:
             if key_input[pygame.K_RIGHT]:
-                self.PACMAN_IMG = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
-                self.PACMAN = pygame.transform.scale(self.PACMAN_IMG, (30, 30))
+                self.pacman_img = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
+                self.pacman = pygame.transform.scale(self.pacman_img, (30, 30))
             elif key_input[pygame.K_LEFT]:
-                self.PACMAN_IMG = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
-                self.PACMAN = pygame.transform.scale(self.PACMAN_IMG, (30, 30))
-                self.PACMAN = pygame.transform.flip(self.PACMAN, True, False)
+                self.pacman_img = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
+                self.pacman = pygame.transform.scale(self.pacman_img, (30, 30))
+                self.pacman = pygame.transform.flip(self.pacman, True, False)
             elif key_input[pygame.K_UP]:
-                self.PACMAN_IMG = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
-                self.PACMAN = pygame.transform.scale(self.PACMAN_IMG, (30, 30))
-                self.PACMAN = pygame.transform.rotate(self.PACMAN, 90)
+                self.pacman_img = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
+                self.pacman = pygame.transform.scale(self.pacman_img, (30, 30))
+                self.pacman = pygame.transform.rotate(self.pacman, 90)
             elif key_input[pygame.K_DOWN]:
-                self.PACMAN_IMG = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
-                self.PACMAN = pygame.transform.scale(self.PACMAN_IMG, (30, 30))
-                self.PACMAN = pygame.transform.rotate(self.PACMAN, -90)
+                self.pacman_img = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
+                self.pacman = pygame.transform.scale(self.pacman_img, (30, 30))
+                self.pacman = pygame.transform.rotate(self.pacman, -90)
         else:
             if key_input[pygame.K_RIGHT]:
-                self.PACMAN_IMG = pygame.image.load(self.pacman_png_CloseMouth).convert_alpha()
-                self.PACMAN = pygame.transform.scale(self.PACMAN_IMG, (30, 30))
+                self.pacman_img = pygame.image.load(self.pacman_png_CloseMouth).convert_alpha()
+                self.pacman = pygame.transform.scale(self.pacman_img, (30, 30))
             elif key_input[pygame.K_LEFT]:
-                self.PACMAN_IMG = pygame.image.load(self.pacman_png_CloseMouth).convert_alpha()
-                self.PACMAN = pygame.transform.scale(self.PACMAN_IMG, (30, 30))
-                self.PACMAN = pygame.transform.flip(self.PACMAN, True, False)
+                self.pacman_img = pygame.image.load(self.pacman_png_CloseMouth).convert_alpha()
+                self.pacman = pygame.transform.scale(self.pacman_img, (30, 30))
+                self.pacman = pygame.transform.flip(self.pacman, True, False)
             elif key_input[pygame.K_UP]:
-                self.PACMAN_IMG = pygame.image.load(self.pacman_png_CloseMouth).convert_alpha()
-                self.PACMAN = pygame.transform.scale(self.PACMAN_IMG, (30, 30))
-                self.PACMAN = pygame.transform.rotate(self.PACMAN, 90)
+                self.pacman_img = pygame.image.load(self.pacman_png_CloseMouth).convert_alpha()
+                self.pacman = pygame.transform.scale(self.pacman_img, (30, 30))
+                self.pacman = pygame.transform.rotate(self.pacman, 90)
             elif key_input[pygame.K_DOWN]:
-                self.PACMAN_IMG = pygame.image.load(self.pacman_png_CloseMouth).convert_alpha()
-                self.PACMAN = pygame.transform.scale(self.PACMAN_IMG, (30, 30))
-                self.PACMAN = pygame.transform.rotate(self.PACMAN, -90)
+                self.pacman_img = pygame.image.load(self.pacman_png_CloseMouth).convert_alpha()
+                self.pacman = pygame.transform.scale(self.pacman_img, (30, 30))
+                self.pacman = pygame.transform.rotate(self.pacman, -90)
 
-        window.blit(self.PACMAN, (self.PACMAN_BB.x + 5, self.PACMAN_BB.y + 5))
+        window.blit(self.pacman, (self.pacman_bb.x + 5, self.pacman_bb.y + 5))
 
     def playSound(self, sound, wait_time):
         # If 1 second has passed since last time stamp, play chomp audio
@@ -81,25 +80,15 @@ class Pacman:
             self.last_timestamp = current_time
 
     def move(self):
-
-        # Get current tick time to pass into playSound
-        # current_time = pygame.time.get_ticks()
-        # If 1 second has passed since last time stamp, play chomp audio
-        # if current_time - self.last_timestamp >= 1000:
-        #     self.playSound(current_time)
-        #     self.last_timestamp = current_time
-
-
         key_input = pygame.key.get_pressed()
-        # Just moves character in direction of arrow key
         if key_input[pygame.K_RIGHT]:
-            self.PACMAN_BB.x += self.move_speed
+            self.pacman_bb.x += self.move_speed
         if key_input[pygame.K_LEFT]:
-            self.PACMAN_BB.x -= self.move_speed
+            self.pacman_bb.x -= self.move_speed
         if key_input[pygame.K_UP]:
-            self.PACMAN_BB.y -= self.move_speed
+            self.pacman_bb.y -= self.move_speed
         if key_input[pygame.K_DOWN]:
-            self.PACMAN_BB.y += self.move_speed
+            self.pacman_bb.y += self.move_speed
 
     def lose_life(self):
         self.playSound(self.death_sound_1, 0)
@@ -148,17 +137,15 @@ class Pacman:
         else:
             return False
 
+    # TODO: Probably want accumulate points outside of Pacman class
     def get_points(self):
         return self.points
 
-    def chase_ghosts(self):
-        return 0
-
     def tunnel_transport(self):
         # TODO: These values are only for 800x600 window
-        if self.PACMAN_BB.x > 800:
-            self.PACMAN_BB.x = -40
-        elif self.PACMAN_BB.x < -40:
-            self.PACMAN_BB.x = 800
+        if self.pacman_bb.x > 800:
+            self.pacman_bb.x = -40
+        elif self.pacman_bb.x < -40:
+            self.pacman_bb.x = 800
 
 
