@@ -72,13 +72,23 @@ def main():
         '''
             Select Level
         '''
-        if ls_screen.level1_button.is_clicked():
+        if ls_screen.back_button.is_clicked_text():
+            game_state = "Home"
+        if ls_screen.level1_button.is_clicked_text():
             print("level 1")
             game_loop.change_level(1)
 
-        elif ls_screen.level2_button.is_clicked():
+        elif ls_screen.level2_button.is_clicked_text():
             print("level 2")
             game_loop.change_level(2)
+
+        # if ls_screen.level1_button.is_clicked():
+        #     print("level 1")
+        #     game_loop.change_level(1)
+        #
+        # elif ls_screen.level2_button.is_clicked():
+        #     print("level 2")
+        #     game_loop.change_level(2)
 
         '''
             Screen States
@@ -90,25 +100,36 @@ def main():
             pygame.mixer.Sound.stop(game_loop.game_start_sound)
             game_state = "Home"
 
-        if game_state == "Home":  #
-            if home_screen.new_game_button.is_clicked():
+        if game_state == "Home":
+            # TODO: For clicking Text
+            if home_screen.new_game_button.is_clicked_text():
                 game_state = "Game"
-            elif home_screen.level_select_button.is_clicked():
+            elif home_screen.level_select_button.is_clicked_text():
                 game_state = "Level"
-            elif home_screen.highscore_button.is_clicked():
+            elif home_screen.highscore_button.is_clicked_text():
                 game_state = "Highscore"
-            elif home_screen.quit_button.is_clicked() or key_input[pygame.K_q]:
+            elif home_screen.quit_button.is_clicked_text() or key_input[pygame.K_q]:
                 running = False
+
+            # TODO: For clicking button contatiner
+            # if home_screen.new_game_button.is_clicked():
+            #     game_state = "Game"
+            # elif home_screen.level_select_button.is_clicked():
+            #     game_state = "Level"
+            # elif home_screen.highscore_button.is_clicked():
+            #     game_state = "Highscore"
+            # elif home_screen.quit_button.is_clicked() or key_input[pygame.K_q]:
+            #     running = False
 
         if game_loop.game_over:
             game_loop.game_over = False
             game_state = "Home"  # TODO: Will want to alter logic here to just go to next level
 
         # if user presses the back button  or space bar go back to Start window
-        if hs_screen.back_button.is_clicked():
+        if hs_screen.back_button.is_clicked_text():
             game_state = "Home"
 
-        # if ls_screen.back_button.is_clicked():
+        # if hs_screen.back_button.is_clicked_text():
         #     game_state = "Home"
 
         update(window, game_state, game_loop, home_screen, ls_screen, hs_screen)
@@ -141,9 +162,6 @@ class HomeScreen:
         self.level_select_button = button.Button(self.window, 400, 325, 300, 75, self._new_game_img, 1, 'solid', 'Select Level')
         self.highscore_button = button.Button(self.window, 400, 425, 300, 75, self._highscore_img, 1, 'solid', 'Highscores')
         self.quit_button = button.Button(self.window, 400, 525, 300, 75, self._quit_img, 1, 'solid', 'Quit')
-        # Load a custom cursor image
-        # self.cursor_hover_image = pygame.image.load('cursor.png')
-        # self.cursor_data, self.cursor_mask = pygame.cursors.compile(self.cursor_hover_image, black='.', white='X', xor='o')
 
     def draw(self, window):
         window.fill((25, 25, 25))  # Replaces game content
@@ -153,15 +171,15 @@ class HomeScreen:
         self.highscore_button.draw()
         self.quit_button.draw()
 
-        if self._logo_button.hover():
+        if self._logo_button.hover_text():
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        elif self.new_game_button.hover():
+        elif self.new_game_button.hover_text():
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        elif self.level_select_button.hover():
+        elif self.level_select_button.hover_text():
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        elif self.highscore_button.hover():
+        elif self.highscore_button.hover_text():
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        elif self.quit_button.hover():
+        elif self.quit_button.hover_text():
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
         else:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
@@ -181,6 +199,15 @@ class LevelSelectScreen:
         self.level1_button.draw()
         self.level2_button.draw()
         self.back_button.draw()
+
+        if self.level1_button.hover_text():
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        elif self.level2_button.hover_text():
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        elif self.back_button.hover_text():
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
 
 # TODO: Put in own class
