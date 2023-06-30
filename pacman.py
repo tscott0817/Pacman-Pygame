@@ -3,15 +3,10 @@ import os
 
 
 class Pacman:
-    # TODO: Change all filepaths to use os.path.join
-    pacman_png_openMouth = os.path.join('assets/img', 'pacmanOpenMouth.png')
-    pacman_png_CloseMouth = os.path.join('assets/img', 'pacmanCloseMouth.png')
-    points = 0
-    pygame.display.init()
-    pygame.display.set_mode((800, 600))
-    pygame.mixer.init()  # Not sure best place to put this
-
     def __init__(self):
+        self.pacman_png_openMouth = os.path.join('assets/img', 'pacmanOpenMouth.png')
+        self.pacman_png_CloseMouth = os.path.join('assets/img', 'pacmanCloseMouth.png')
+        self.points = 0
         self.pacman_img = pygame.image.load(self.pacman_png_openMouth).convert_alpha()
         self.pacman = pygame.transform.scale(self.pacman_img, (30, 30))
         self.pacman_bb = pygame.Rect(600, 200, 40, 40)
@@ -25,7 +20,6 @@ class Pacman:
         self.frightened_sound = pygame.mixer.Sound("assets/audio/power_pellet.wav")
         self.death_sound_1 = pygame.mixer.Sound("assets/audio/death_1.wav")
         self.death_sound_2 = pygame.mixer.Sound("assets/audio/death_2.wav")
-
         self.last_timestamp = pygame.time.get_ticks()
 
     def draw(self, window):

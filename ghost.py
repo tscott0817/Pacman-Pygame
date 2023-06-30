@@ -5,14 +5,13 @@ import heapq  # For A* pathfinding
 import tracemalloc  # FOR MEMORY PROFILING
 
 class Ghost():
-    red_g = os.path.join('assets/img', 'red_ghost.png')
-    blue_g = os.path.join('assets/img', 'turquoise_ghost.png')
-    yellow_g = os.path.join('assets/img', 'yellow_ghost.png')
-    pink_g = os.path.join('assets/img', 'pink_ghost.png')
-    scared_g = os.path.join('assets/img', 'scared_ghost.png')
-    pygame.mixer.init()  # Not sure best place to put this
-
     def __init__(self, color):
+        self.red_g = os.path.join('assets/img', 'red_ghost.png')
+        self.blue_g = os.path.join('assets/img', 'turquoise_ghost.png')
+        self.yellow_g = os.path.join('assets/img', 'yellow_ghost.png')
+        self.pink_g = os.path.join('assets/img', 'pink_ghost.png')
+        self.scared_g = os.path.join('assets/img', 'scared_ghost.png')
+
         if color == "Red":
             self.ghost_img = pygame.image.load(self.red_g).convert_alpha()
             # self.ghost = pygame.transform.scale(self.ghost_img, (40, 40))

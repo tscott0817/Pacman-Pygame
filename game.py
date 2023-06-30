@@ -13,31 +13,11 @@ filepath = "save_data/hi_scores.csv"
 save = save_to_file.SaveToFile(filepath)
 username = "Joe"  # TODO: This will be entered in by the user
 
-# Used so score is only added to file once per game
-save_score = True
-game_started = False
-
 class Game:
-
-    # Unsure if this is best here or outside of class
-    # User and ghost
-    player = pacman.Pacman()
-    blue_ghost = ghost.Ghost("Blue")
-    red_ghost = ghost.Ghost("Red")
-    yellow_ghost = ghost.Ghost("Yellow")
-    pink_ghost = ghost.Ghost("Pink")
-    # filepath to images
-    fruit_png = os.path.join('assets/img', 'fruit.png')
-    life_png = os.path.join('assets/img', 'lives.png')
-    pygame.mixer.init()
-
+    pygame.mixer.init()  # TODO: Would prefer this only in main.py, but doesn't work with Ghost and Pacman class unless here.
 
     def __init__(self, window):
-        # Window stuff
-        pygame.font.init()
         self.square = 40
-        self.fruit_img = pygame.image.load(self.fruit_png).convert_alpha()
-        self.fruit = pygame.transform.scale(self.fruit_img, (30, 30))
         self.window = window
         self.horizontal_offset = 0
         self.pellet_tick = None
@@ -51,6 +31,7 @@ class Game:
         self.power_pellets = []  # The larger
         self.possible_ghost_directions = []  # Each list holds directions possible from each decision npe
         self.possible_food_locations = []
+        self.board = []
         self.time_list = [2000, 5000, 8000]
         self.food_timer_choice = None
         self.can_spawn_food = False
@@ -58,7 +39,17 @@ class Game:
         self.food_spawn_again = True
         self.food_tick = 0
         self.level = 1
-        self.board = []
+        self.fruit_png = os.path.join('assets/img', 'fruit.png')
+        self.life_png = os.path.join('assets/img', 'lives.png')
+        self.fruit_img = pygame.image.load(self.fruit_png).convert_alpha()
+        self.fruit = pygame.transform.scale(self.fruit_img, (30, 30))
+
+        # Characters
+        self.player = pacman.Pacman()
+        self.blue_ghost = ghost.Ghost("Blue")
+        self.red_ghost = ghost.Ghost("Red")
+        self.yellow_ghost = ghost.Ghost("Yellow")
+        self.pink_ghost = ghost.Ghost("Pink")
 
         # Used for resetting pacman after ghost catches it
         self.pacman_spawn_point = None
@@ -68,17 +59,22 @@ class Game:
         self.game_over = False
         self.read_board_from_file()
 
+        # Sounds
         self.game_start_sound = pygame.mixer.Sound("assets/audio/game_start.wav")
         self.background_music = pygame.mixer.Sound("assets/audio/siren_1.wav")
-        self.background_music.set_volume(.75)
+        self.background_music.set_volume(2)
         self.last_timestamp = pygame.time.get_ticks()
-
-        self.game_board_init()
-
         self.frightened_sound = pygame.mixer.Sound("assets/audio/power_pellet.wav")
         self.frightened_sound.set_volume(0.3)
+
+        # Text Stuff
         self.font = pygame.font.Font('freesansbold.ttf', 32)
 
+        # Used so score is only added to file once per game
+        self.save_score = True
+        self.game_started = False
+
+        self.game_board_init()
 
 
 
@@ -86,7 +82,7 @@ class Game:
 
         dead = self.player.die()
         if not dead and not self.game_won():
-            self.window.fill(BACK_BLUE)
+            self.window.fill(BACK_BLACK)
             self.game_board()
             self.player.move()
             self.player.tunnel_transport()
@@ -115,15 +111,16 @@ class Game:
                 self.player.points = 0
                 self.points = 0
                 self.game_over = True
-                pygame.display.update()  # Don't call this outside of if statement, needed for time delay
+                # TODO: Do I need this?
+                # pygame.display.update()  # Don't call this outside of if statement, needed for time delay
                 pygame.time.delay(5000)
 
-            global save_score
+            # global save_score
             if self.game_won():
                 self.draw_won(325, 290)
-                if save_score:
+                if self.save_score:
                     save.hi_scores(username, self.points)
-                    save_score = False
+                    self.save_score = False
                 self.player.points = 0
                 self.points = 0
                 self.player.num_lives = 3
@@ -136,14 +133,14 @@ class Game:
 
     def read_board_from_file(self):
         # drawing board by reading files
-        fileName = "map" + str(self.level) + ".txt"
-        gameBoard = open(fileName, 'r')
-        for line in gameBoard:
-            oneRow = line.split()
-            oneRow2 = []
-            for num in oneRow:
-                oneRow2.append(int(num))
-            self.board.append(oneRow2)
+        filename = "map" + str(self.level) + ".txt"
+        game_board = open(filename, 'r')
+        for line in game_board:
+            row_one = line.split()
+            row_new = []
+            for num in row_one:
+                row_new.append(int(num))
+            self.board.append(row_new)
 
     def game_board_init(self):
         self.player.points = 0
@@ -225,7 +222,9 @@ class Game:
 
                 elif self.board[i][j] == 6:
                     # For the decision tile list (Need them to be rectangles)
-                    decision_node = pygame.draw.rect(self.window, BACK_BLUE, ((j * self.square) + (self.horizontal_offset), i * self.square, self.square, self.square), 1)
+                    # decision_node = pygame.draw.rect(self.window, RED, ((j * self.square) + (self.horizontal_offset), i * self.square, self.square, self.square), 1)
+                    decision_node = pygame.draw.rect(self.window, BACK_BLACK, ((j * self.square) + (self.horizontal_offset), i * self.square, self.square, self.square), 1)
+
 
                     # What the pacman collects
                     #tic_tac = pygame.draw.circle(self.window, GREEN, ((j * self.square + self.square // 2) + (self.horizontal_offset), i * self.square + self.square // 2), self.square // 4)
@@ -243,7 +242,9 @@ class Game:
                         self.points = self.player.points
                         self.board[i][j] = 7
                     elif self.board[i][j] == 7:
-                        pygame.draw.rect(self.window, BACK_BLUE, ((j * self.square) + (self.horizontal_offset), i * self.square, self.square, self.square), 1)
+                        # pygame.draw.rect(self.window, RED, ((j * self.square) + (self.horizontal_offset), i * self.square, self.square, self.square), 1)
+                        pygame.draw.rect(self.window, BACK_BLACK, ((j * self.square) + (self.horizontal_offset), i * self.square, self.square, self.square), 1)
+
 
                 elif self.board[i][j] == 9:
                     ghost_spawn = pygame.draw.rect(self.window, RED, ((j * self.square) + (self.horizontal_offset), i * self.square, self.square, self.square), 1)
@@ -256,12 +257,9 @@ class Game:
         self.board_built = True  # Indicates the board has been built at least one time
 
     def draw_top(self):
-        # draw from left to right
-        # scores
         score = self.font.render("Score: " + str(self.points), True, (255, 255, 255))
         self.window.blit(score, (2*self.square, 7.5))
 
-        # lives
         for i in range(self.player.num_lives):
             lives_img = pygame.image.load(self.life_png).convert_alpha()
             lives = pygame.transform.scale(lives_img, (30, 30))
