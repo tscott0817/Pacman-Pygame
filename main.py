@@ -141,6 +141,7 @@ def update(window, game_state, game_loop, home_screen, ls_screen, hs_screen):  #
     if game_state == "Home":
         home_screen.draw(window)
     elif game_state == "Game":
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
         game_loop.update()
     elif game_state == "Level":
         ls_screen.draw(window)
@@ -249,6 +250,11 @@ class HighscoresScreen:
             window.blit(user_score, (800 * .6, score_position))
 
         self.back_button.draw()
+
+        if self.back_button.hover_text():
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
 
 if __name__ == "__main__":
